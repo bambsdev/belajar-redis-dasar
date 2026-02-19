@@ -726,6 +726,19 @@ Struktur data probabilistik untuk melakukan estimasi kardinalitas (jumlah data u
 - `PFADD unique:visitors "user1" "user2"`: Menambahkan data.
 - `PFCOUNT unique:visitors`: Menghitung estimasi jumlah data unik.
 
+### Pub/Sub
+
+Redis Pub/Sub (Publish/Subscribe) adalah sistem pengiriman pesan di mana _publisher_ mengirim pesan ke sebuah _channel_, tanpa mengetahui siapa _subscriber_ (penerima) pesannya. Sebaliknya, _subscriber_ menerima pesan dari channel yang mereka minati tanpa mengetahui siapa _publisher_-nya.
+
+- **Model**: Menggunakan model _broadcast_, di mana satu pesan dari publisher akan dikirim ke semua subscriber di channel yang sama.
+- **Pengiriman**: Sifatnya _fire and forget_ (_at-most-once delivery_). Jika tidak ada subscriber yang sedang mendengarkan di sebuah channel, pesan yang dikirim ke channel tersebut akan hilang dan tidak akan pernah diterima.
+
+**Contoh Perintah:**
+
+- `SUBSCRIBE channel1 channel2`: Klien mulai mendengarkan pesan dari `channel1` dan `channel2`.
+- `PUBLISH channel1 "Hello"`: Mengirim pesan "Hello" ke semua subscriber di `channel1`.
+- `PUBSUB CHANNELS`: Melihat daftar channel yang aktif (memiliki setidaknya satu subscriber).
+
 ## 📋 Kesimpulan
 
 Redis adalah in-memory data store yang powerful dengan fitur-fitur lengkap untuk:
