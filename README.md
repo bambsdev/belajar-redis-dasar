@@ -19,6 +19,7 @@
 15. [Security & Authentication](#-security--authentication)
 16. [Persistence (Penyimpanan Data)](#-persistence-penyimpanan-data)
 17. [Eviction Policy](#-eviction-policy)
+18. [Struktur Data di Redis](#-struktur-data-di-redis)
 
 ---
 
@@ -619,6 +620,7 @@ Ketika memory Redis mencapai limit yang ditentukan (`maxmemory`), eviction polic
    - `volatile-random` : Hanya dari key dengan TTL
 
 5. **TTL Based**
+
    ```
    maxmemory-policy volatile-ttl
    ```
@@ -642,6 +644,88 @@ maxmemory-policy allkeys-lru
 
 ---
 
+## 💾 Struktur Data di Redis
+
+Redis mendukung berbagai macam struktur data kompleks selain String.
+
+### List
+
+Struktur data _Linked List_ yang berisi koleksi string. Data disimpan berurutan dan bisa duplikat. Berguna untuk implementasi _stack_ (dengan `LPUSH`/`LPOP`) atau _queue_ (dengan `LPUSH`/`RPOP`).
+
+**Contoh Perintah:**
+
+- `LPUSH mylist "A"`: Menambah "A" ke kiri (awal) list.
+- `RPUSH mylist "B"`: Menambah "B" ke kanan (akhir) list.
+- `LPOP mylist`: Mengambil dan menghapus elemen dari kiri.
+- `RPOP mylist`: Mengambil dan menghapus elemen dari kanan.
+- `LRANGE mylist 0 -1`: Melihat semua elemen dalam list.
+
+### Sets
+
+Koleksi data string yang tidak berurut dan dijamin unik. Berguna jika Anda hanya perlu menyimpan data unik tanpa mempedulikan urutan.
+
+**Contoh Perintah:**
+
+- `SADD myset "A" "B" "C"`: Menambah anggota ke set.
+- `SMEMBERS myset`: Melihat semua anggota set.
+- `SISMEMBER myset "A"`: Cek apakah "A" adalah anggota set.
+- `SREM myset "C"`: Menghapus anggota dari set.
+- `SUNION set1 set2`: Menggabungkan dua set.
+- `SINTER set1 set2`: Mencari irisan (anggota yang sama) dari dua set.
+- `SDIFF set1 set2`: Mencari perbedaan antara dua set.
+
+### Hashes
+
+Struktur data _key-value pair_, mirip seperti objek atau dictionary. Setiap hash bisa memiliki banyak field dan value.
+
+**Contoh Perintah:**
+
+- `HSET user:1 name "Ibrohim" age 25`: Menyimpan data user.
+- `HGET user:1 name`: Mengambil value dari field 'name'.
+- `HGETALL user:1`: Mengambil semua field dan value dari hash.
+- `HINCRBY user:1 age 1`: Menambah nilai field numerik.
+
+### Sorted Sets
+
+Struktur data seperti Sets (data unik), namun setiap anggota memiliki _score_ (nilai numerik) yang digunakan untuk mengurutkan data. Sangat berguna untuk leaderboard atau ranking.
+
+**Contoh Perintah:**
+
+- `ZADD ranking 100 "eko" 90 "budi"`: Menambah anggota dengan score.
+- `ZRANGE ranking 0 -1`: Melihat anggota berdasarkan urutan score (terkecil ke terbesar).
+- `ZREVRANGE ranking 0 -1`: Melihat anggota berdasarkan urutan score terbalik.
+- `ZRANGE ranking 0 -1 WITHSCORES`: Melihat anggota beserta score-nya.
+
+### Stream
+
+Struktur data _append-only_ seperti log. Data ditambahkan di akhir dan setiap entri memiliki ID unik (biasanya timestamp). Cocok untuk mencatat event, sensor data, atau sebagai message broker dengan _consumer groups_.
+
+**Contoh Perintah:**
+
+- `XADD mystream * level "info" msg "hello"`: Menambah entri baru.
+- `XREAD COUNT 10 STREAMS mystream 0`: Membaca data dari stream.
+- `XGROUP CREATE mystream mygroup $ MKSTREAM`: Membuat consumer group.
+- `XREADGROUP GROUP mygroup consumer-1 COUNT 1 STREAMS mystream >`: Membaca data sebagai bagian dari group.
+
+### Geospatial
+
+Struktur data khusus untuk menyimpan koordinat geografis (longitude, latitude) dan melakukan query berbasis lokasi.
+
+**Contoh Perintah:**
+
+- `GEOADD seller:location 107.123 -6.234 "seller1"`: Menambah lokasi.
+- `GEODIST seller:location "seller1" "seller2" km`: Menghitung jarak antara dua titik.
+- `GEOSEARCH seller:location FROMLONLAT 107.12 -6.23 BYRADIUS 5 km`: Mencari titik dalam radius tertentu.
+
+### HyperLogLog
+
+Struktur data probabilistik untuk melakukan estimasi kardinalitas (jumlah data unik) dari sebuah set dengan penggunaan memori yang sangat efisien. Anda tidak bisa mengambil datanya kembali, hanya bisa menghitung estimasi jumlahnya.
+
+**Contoh Perintah:**
+
+- `PFADD unique:visitors "user1" "user2"`: Menambahkan data.
+- `PFCOUNT unique:visitors`: Menghitung estimasi jumlah data unik.
+
 ## 📋 Kesimpulan
 
 Redis adalah in-memory data store yang powerful dengan fitur-fitur lengkap untuk:
@@ -656,7 +740,6 @@ Dengan memahami semua konsep di atas, Anda sudah memiliki fondasi yang kuat untu
 
 **Tips Selanjutnya:**
 
-- Explore Redis data structures lain: List, Set, Hash, Sorted Set
 - Pelajari Redis Cluster untuk scalability
 - Pelajari Redis Streams untuk messaging
 - Praktik dengan use case nyata di aplikasi Anda
